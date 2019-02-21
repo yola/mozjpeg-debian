@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
+%:
+	dh $@ --buildsystem autoconf --with autoreconf --parallel
+
+override_dh_auto_configure:
+	dh_auto_configure -- --prefix=/opt/mozjpeg
+
+override_dh_auto_install:
+	dh_auto_install
+	# Leave the libraries in /opt/ but move other things up, prefixed mozjpeg_
+	mkdir debian/mozjpeg/usr
+	mv debian/mozjpeg/opt/mozjpeg/bin \
+		debian/mozjpeg/opt/mozjpeg/share \
+		debian/mozjpeg/usr
+	rename 's,/([^/]*)$$,/mozjpeg_\1,' \
+		debian/mozjpeg/usr/bin/* \
+		debian/mozjpeg/usr/share/man/man1/*
